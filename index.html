@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Плейлист</title>
+    <title>Мой Плейлист</title>
     <style>
         body { font-family: sans-serif; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
         .player-card { background: #1e293b; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; width: 85%; max-width: 340px; }
@@ -53,10 +53,20 @@
 <audio id="audio" src=""></audio>
 
 <script>
-    const GITHUB_USER = "semenovd130900-max";
-    const GITHUB_REPO = "square-app";
+    // Фиксированный плейлист из ваших реальных файлов на GitHub
+    const tracks = [
+        { 
+            title: "Земляк", 
+            artist: "Koss, ПЛУТТО", 
+            src: "Koss, ПЛУТТО - Земляк.mp3"
+        },
+        { 
+            title: "Мир", 
+            artist: "MIRAVI feat. Гио Пика", 
+            src: "miravi-feat.-gio-pika-mir (1).mp3"
+        }
+    ];
 
-    let tracks = [];
     let currentTrackIndex = 0;
     let isPlaying = false;
     let isLooping = false;
@@ -72,50 +82,13 @@
     const durationEl = document.getElementById('duration');
     const trackCountEl = document.getElementById('trackCount');
 
-    async function scanGitHubTracks() {
-        try {
-            const response = await fetch(`https://github.com{GITHUB_USER}/${GITHUB_REPO}/contents/`);
-            const files = await response.json();
-            const mp3Files = files.filter(file => file.name.toLowerCase().endsWith('.mp3'));
-            
-            if (mp3Files.length === 0) {
-                title.innerText = "Песни не найдены";
-                artist.innerText = "Загрузите mp3 на GitHub";
-                return;
-            }
-
-            tracks = mp3Files.map(file => {
-                let cleanName = file.name.replace(/\.mp3$/i, '');
-                let separator = cleanName.includes('—') ? '—' : (cleanName.includes('-') ? '-' : null);
-                
-                if (separator) {
-                    let parts = cleanName.split(separator);
-                    return {
-                        title: parts[1] ? parts[1].trim() : parts[0].trim(),
-                        artist: parts[1] ? parts[0].trim() : "Музыка",
-                        src: file.name
-                    };
-                } else {
-                    return {
-                        title: cleanName,
-                        artist: "Мой трек",
-                        src: file.name
-                    };
-                }
-            });
-
-            loadTrack(tracks[currentTrackIndex]);
-            updateTrackCount();
-        } catch (error) {
-            title.innerText = "Ошибка загрузки";
-        }
-    }
-
     function loadTrack(track) {
         if (!track) return;
         title.innerText = track.title;
         artist.innerText = track.artist;
+        // Безопасное кодирование пробелов в ссылке для iPhone
         audio.src = encodeURIComponent(track.src).replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29");
+        coverBox.innerHTML = `<span class="no-cover">🎵</span>`;
     }
 
     function updateTrackCount() {
@@ -132,7 +105,7 @@
     function playTrack() {
         isPlaying = true;
         playBtn.innerText = "⏸";
-        audio.play().catch(e => console.log("Ожидание клика"));
+        audio.play().catch(e => console.log("Плеер ожидает клика пользователя"));
     }
 
     function pauseTrack() {
@@ -176,6 +149,7 @@
     audio.addEventListener('timeupdate', () => {
         const currentTime = audio.currentTime;
         const duration = audio.duration || 0;
+        
         if (duration) {
             const progressPercent = (currentTime / duration) * 100;
             progress.style.width = `${progressPercent}%`;
@@ -197,7 +171,11 @@
         }
     }
 
-    scanGitHubTracks();
+    // Загружаем первый трек сразу
+    if (tracks.length > 0) {
+        loadTrack(tracks[currentTrackIndex]);
+        updateTrackCount();
+    }
 </script>
 
 </body>
