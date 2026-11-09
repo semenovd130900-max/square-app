@@ -3,37 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Квадрат числа</title>
+    <title>Мой VK Плеер</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 350px; }
-        h2 { color: #333; margin-bottom: 20px; }
-        input { width: 90%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; text-align: center; box-sizing: border-box; }
-        button { width: 90%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; box-sizing: border-box; }
-        button:active { background: #0056b3; }
-        #result { margin-top: 20px; font-size: 18px; font-weight: bold; color: #28a745; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
+        .player-card { background: #1e293b; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; width: 85%; max-width: 340px; }
+        .cover-box { width: 200px; height: 200px; margin: 0 auto 20px; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.4); background: #334155; display: flex; align-items: center; justify-content: center; }
+        .cover-box img { width: 100%; height: 100%; object-fit: cover; }
+        .no-cover { font-size: 60px; }
+        h2 { margin: 10px 0 5px; font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        p { margin: 0 0 20px; color: #94a3b8; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .progress-block { margin-bottom: 15px; }
+        .progress-container { width: 100%; background: #475569; height: 6px; border-radius: 10px; cursor: pointer; position: relative; }
+        .progress { background: #0077ff; width: 0%; height: 100%; border-radius: 10px; }
+        .time-box { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-top: 5px; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 15px; }
+        .btn { background: #334155; border: none; color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn:active { background: #475569; transform: scale(0.95); }
+        .btn-main { background: #0077ff; width: 55px; height: 55px; font-size: 22px; }
+        .btn-main:active { background: #0055cc; }
+        .btn-active { background: #0077ff; color: white; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Возведение в квадрат</h2>
-    <input type="number" id="numInput" placeholder="Введите число">
-    <button onclick="calculate()">Посчитать</button>
-    <div id="result"></div>
+<div class="player-card">
+    <div class="cover-box" id="coverBox"><span class="no-cover">🎵</span></div>
+    <h2 id="title">Название трека</h2>
+    <p id="artist">Исполнитель</p>
+
+    <div class="progress-block">
+        <div class="progress-container" onclick="setProgress(event)">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div class="time-box">
+            <span id="currentTime">0:00</span>
+            <span id="duration">0:00</span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" id="loopBtn" onclick="toggleLoop()">🔁</button>
+        <button class="btn" onclick="prevTrack()">⏮</button>
+        <button class="btn btn-main" id="playBtn" onclick="togglePlay()">▶</button>
+        <button class="btn" onclick="nextTrack()">⏭</button>
+    </div>
 </div>
 
+<audio id="audio" src=""></audio>
+
 <script>
-    function calculate() {
-        let input = document.getElementById('numInput').value;
-        if (input === "") {
-            document.getElementById('result').innerText = "Введите число!";
+    // 🛠️ МЕСТО ДЛЯ ССЫЛОК ИЗ ВКОНТАКТЕ (строки 60-73)
+    const tracks = [
+        { 
+            title: "Мой первый трек из ВК", 
+            artist: "Исполнитель", 
+            src: "ВСТАВЬТЕ_СЮДА_ПРЯМУЮ_ССЫЛКУ_НА_MP3_ФАЙЛ", 
+            cover: "" 
+        },
+        { 
+            title: "Мой второй трек из ВК", 
+            artist: "Исполнитель", 
+            src: "ВСТАВЬТЕ_ВТОРУЮ_ССЫЛКУ_НА_MP3_ФАЙЛ", 
+            cover: "" 
+        }
+    ];
+
+    let currentTrackIndex = 0;
+    let isPlaying = false;
+    let isLooping = false;
+
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const loopBtn = document.getElementById('loopBtn');
+    const title = document.getElementById('title');
+    const artist = document.getElementById('artist');
+    const progress = document.getElementById('progress');
+    const coverBox = document.getElementById('coverBox');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+
+    function loadTrack(track) {
+        title.innerText = track.title;
+        artist.innerText = track.artist;
+        audio.src = track.src;
+        
+        if (track.cover && track.cover !== "") {
+            coverBox.innerHTML = `<img src="${track.cover}" alt="Обложка">`;
+        } else {
+            coverBox.innerHTML = `<span class="no-cover">🎵</span>`;
+        }
+    }
+
+    function togglePlay() {
+        if (tracks[currentTrackIndex].src.includes("ВСТАВЬТЕ_")) {
+            alert("Сначала подставьте настоящую ссылку на аудиофайл в код!");
             return;
         }
-        let number = parseFloat(input);
-        let square = number * number;
-        document.getElementById('result').innerText = `Результат: ${square}`;
+        if (isPlaying) { pauseTrack(); } else { playTrack(); }
     }
+
+    function playTrack() {
+        isPlaying = true;
+        playBtn.innerText = "⏸";
+        audio.play().catch(e => console.log("Ошибка. Нужно действие пользователя."));
+    }
+
+    function pauseTrack() {
+        isPlaying = false;
+        playBtn.innerText = "▶";
+        audio.pause();
+    }
+
+    function prevTrack() {
+        currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+        loadTrack(tracks[currentTrackIndex]);
+        if (isPlaying) playTrack();
+    }
+
+    function nextTrack() {
+        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+        loadTrack(tracks[currentTrackIndex]);
+        if (isPlaying) playTrack();
+    }
+
+    function toggleLoop() {
+        isLooping = !isLooping;
+        audio.loop = isLooping;
+        if (isLooping) {
+            loopBtn.classList.add('btn-active');
+        } else {
+            loopBtn.classList.remove('btn-active');
+        }
+    }
+
+    function formatTime(time) {
+        const min = Math.floor(time / 60);
+        const sec = Math.floor(time % 60);
+        return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    audio.addEventListener('timeupdate', () => {
+        const currentTime = audio.currentTime;
+        const duration = audio.duration || 0;
+        
+        if (duration) {
+            const progressPercent = (currentTime / duration) * 100;
+            progress.style.width = `${progressPercent}%`;
+            durationEl.innerText = formatTime(duration);
+        }
+        currentTimeEl.innerText = formatTime(currentTime);
+    });
+
+    audio.addEventListener('ended', () => {
+        if (!isLooping) nextTrack();
+    });
+
+    function setProgress(e) {
+        const width = e.currentTarget.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audio.duration;
+        if (duration) {
+            audio.currentTime = (clickX / width) * duration;
+        }
+    }
+
+    if(tracks.length > 0) loadTrack(tracks[currentTrackIndex]);
 </script>
 
 </body>
