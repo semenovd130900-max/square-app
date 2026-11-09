@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой Большой Плейлист</title>
+    <title>Плейлист</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
+        body { font-family: sans-serif; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
         .player-card { background: #1e293b; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; width: 85%; max-width: 340px; }
         .cover-box { width: 200px; height: 200px; margin: 0 auto 20px; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.4); background: #334155; display: flex; align-items: center; justify-content: center; }
         .no-cover { font-size: 60px; }
@@ -28,7 +28,7 @@
 
 <div class="player-card">
     <div class="cover-box" id="coverBox"><span class="no-cover">🎵</span></div>
-    <h2 id="title">Загрузка треков...</h2>
+    <h2 id="title">Загрузка...</h2>
     <p id="artist">Пожалуйста, подождите</p>
 
     <div class="progress-block">
@@ -53,8 +53,6 @@
 <audio id="audio" src=""></audio>
 
 <script>
-    // 🛠️ АВТОМАТИЧЕСКИЙ ПЛЕЕР
-    // Код сам обращается к вашему GitHub и собирает список всех загруженных файлов .mp3
     const GITHUB_USER = "semenovd130900-max";
     const GITHUB_REPO = "square-app";
 
@@ -74,51 +72,56 @@
     const durationEl = document.getElementById('duration');
     const trackCountEl = document.getElementById('trackCount');
 
-    // Функция сканирования вашего репозитория GitHub
     async function scanGitHubTracks() {
         try {
             const response = await fetch(`https://github.com{GITHUB_USER}/${GITHUB_REPO}/contents/`);
             const files = await response.json();
-            
-            // Фильтруем файлы, оставляя только те, что заканчиваются на .mp3
             const mp3Files = files.filter(file => file.name.toLowerCase().endsWith('.mp3'));
             
             if (mp3Files.length === 0) {
                 title.innerText = "Песни не найдены";
-                artist.innerText = "Загрузите .mp3 файлы на GitHub";
+                artist.innerText = "Загрузите mp3 на GitHub";
                 return;
             }
 
-            // Формируем плейлист
             tracks = mp3Files.map(file => {
-                // Разделяем имя файла на исполнителя и название, если есть дефис "-"
-                let nameWithoutExtension = file.name.replace('.mp3', '');
-                let parts = nameWithoutExtension.split('-');
+                let cleanName = file.name.replace(/\.mp3$/i, '');
+                let separator = cleanName.includes('—') ? '—' : (cleanName.includes('-') ? '-' : null);
                 
-                return {
-                    title: parts[1] ? parts[1].trim() : parts[0].trim(),
-                    artist: parts[1] ? parts[0].trim() : "Моя музыка",
-                    src: file.name
-                };
+                if (separator) {
+                    let parts = cleanName.split(separator);
+                    return {
+                        title: parts[1] ? parts[1].trim() : parts[0].trim(),
+                        artist: parts[1] ? parts[0].trim() : "Музыка",
+                        src: file.name
+                    };
+                } else {
+                    return {
+                        title: cleanName,
+                        artist: "Мой трек",
+                        src: file.name
+                    };
+                }
             });
 
             loadTrack(tracks[currentTrackIndex]);
             updateTrackCount();
         } catch (error) {
-            console.error("Ошибка обновления списка:", error);
-            title.innerText = "Ошибка сети";
+            title.innerText = "Ошибка загрузки";
         }
     }
 
     function loadTrack(track) {
+        if (!track) return;
         title.innerText = track.title;
         artist.innerText = track.artist;
-        audio.src = encodeURIComponent(track.src);
-        coverBox.innerHTML = `<span class="no-cover">🎵</span>`;
+        audio.src = encodeURIComponent(track.src).replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29");
     }
 
     function updateTrackCount() {
-        trackCountEl.innerText = `Трек ${currentTrackIndex + 1} из ${tracks.length}`;
+        if (tracks.length > 0) {
+            trackCountEl.innerText = `Трек ${currentTrackIndex + 1} из ${tracks.length}`;
+        }
     }
 
     function togglePlay() {
@@ -129,7 +132,7 @@
     function playTrack() {
         isPlaying = true;
         playBtn.innerText = "⏸";
-        audio.play().catch(e => console.log("Ошибка старта: нажмите еще раз"));
+        audio.play().catch(e => console.log("Ожидание клика"));
     }
 
     function pauseTrack() {
@@ -173,7 +176,6 @@
     audio.addEventListener('timeupdate', () => {
         const currentTime = audio.currentTime;
         const duration = audio.duration || 0;
-        
         if (duration) {
             const progressPercent = (currentTime / duration) * 100;
             progress.style.width = `${progressPercent}%`;
@@ -195,7 +197,6 @@
         }
     }
 
-    // Запускаем сканирование при старте приложения
     scanGitHubTracks();
 </script>
 
