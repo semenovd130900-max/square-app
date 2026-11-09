@@ -52,18 +52,11 @@
 <audio id="audio" src=""></audio>
 
 <script>
-    // 🛠️ МЕСТО ДЛЯ ССЫЛОК ИЗ ВКОНТАКТЕ (строки 60-73)
     const tracks = [
         { 
-            title: "Мой первый трек из ВК", 
+            title: "Мой трек из ВК", 
             artist: "Исполнитель", 
-            src: "https://vk.ru/audio-2001141276_154141276", 
-            cover: "" 
-        },
-        { 
-            title: "Мой второй трек из ВК", 
-            artist: "Исполнитель", 
-            src: "ВСТАВЬТЕ_ВТОРУЮ_ССЫЛКУ_НА_MP3_ФАЙЛ", 
+            src: "СЮДА_ВСТАВИТЬ_ДЛИННУЮ_ССЫЛКУ_MP3", 
             cover: "" 
         }
     ];
@@ -86,17 +79,12 @@
         title.innerText = track.title;
         artist.innerText = track.artist;
         audio.src = track.src;
-        
-        if (track.cover && track.cover !== "") {
-            coverBox.innerHTML = `<img src="${track.cover}" alt="Обложка">`;
-        } else {
-            coverBox.innerHTML = `<span class="no-cover">🎵</span>`;
-        }
+        coverBox.innerHTML = `<span class="no-cover">🎵</span>`;
     }
 
     function togglePlay() {
-        if (tracks[currentTrackIndex].src.includes("ВСТАВЬТЕ_")) {
-            alert("Сначала подставьте настоящую ссылку на аудиофайл в код!");
+        if (tracks[currentTrackIndex].src.includes("СЮДА_ВСТАВИТЬ")) {
+            alert("Пожалуйста, сначала вставьте реальную MP3 ссылку!");
             return;
         }
         if (isPlaying) { pauseTrack(); } else { playTrack(); }
@@ -105,7 +93,7 @@
     function playTrack() {
         isPlaying = true;
         playBtn.innerText = "⏸";
-        audio.play().catch(e => console.log("Ошибка. Нужно действие пользователя."));
+        audio.play().catch(e => console.log("Ошибка воспроизведения."));
     }
 
     function pauseTrack() {
