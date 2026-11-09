@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="notranslate" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="manifest.json">
     <title>Мой Плейлист</title>
     <style>
         body { font-family: sans-serif; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
@@ -54,7 +54,6 @@
 <audio id="audio" src=""></audio>
 
 <script>
-    // Фиксированный плейлист из ваших реальных файлов на GitHub
     const tracks = [
         { 
             title: "Земляк", 
@@ -87,7 +86,6 @@
         if (!track) return;
         title.innerText = track.title;
         artist.innerText = track.artist;
-        // Безопасное кодирование пробелов в ссылке для iPhone
         audio.src = encodeURIComponent(track.src).replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29");
         coverBox.innerHTML = `<span class="no-cover">🎵</span>`;
     }
@@ -106,7 +104,7 @@
     function playTrack() {
         isPlaying = true;
         playBtn.innerText = "⏸";
-        audio.play().catch(e => console.log("Плеер ожидает клика пользователя"));
+        audio.play().catch(e => console.log("Ожидание клика"));
     }
 
     function pauseTrack() {
@@ -150,7 +148,6 @@
     audio.addEventListener('timeupdate', () => {
         const currentTime = audio.currentTime;
         const duration = audio.duration || 0;
-        
         if (duration) {
             const progressPercent = (currentTime / duration) * 100;
             progress.style.width = `${progressPercent}%`;
@@ -172,7 +169,6 @@
         }
     }
 
-    // Загружаем первый трек сразу
     if (tracks.length > 0) {
         loadTrack(tracks[currentTrackIndex]);
         updateTrackCount();
