@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой VK Плеер</title>
+    <title>Мой Плеер</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
         .player-card { background: #1e293b; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; width: 85%; max-width: 340px; }
         .cover-box { width: 200px; height: 200px; margin: 0 auto 20px; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.4); background: #334155; display: flex; align-items: center; justify-content: center; }
-        .cover-box img { width: 100%; height: 100%; object-fit: cover; }
         .no-cover { font-size: 60px; }
         h2 { margin: 10px 0 5px; font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         p { margin: 0 0 20px; color: #94a3b8; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -54,9 +53,9 @@
 <script>
     const tracks = [
         { 
-            title: "Мой трек из ВК", 
-            artist: "Исполнитель", 
-            src: "СЮДА_ВСТАВИТЬ_ДЛИННУЮ_ССЫЛКУ_MP3", 
+            title: "Земляк", 
+            artist: "Koss, ПЛУТТО", 
+            src: "Koss, ПЛУТТО - Земляк.mp3", 
             cover: "" 
         }
     ];
@@ -78,22 +77,18 @@
     function loadTrack(track) {
         title.innerText = track.title;
         artist.innerText = track.artist;
-        audio.src = track.src;
+        audio.src = encodeURIComponent(track.src);
         coverBox.innerHTML = `<span class="no-cover">🎵</span>`;
     }
 
     function togglePlay() {
-        if (tracks[currentTrackIndex].src.includes("СЮДА_ВСТАВИТЬ")) {
-            alert("Пожалуйста, сначала вставьте реальную MP3 ссылку!");
-            return;
-        }
         if (isPlaying) { pauseTrack(); } else { playTrack(); }
     }
 
     function playTrack() {
         isPlaying = true;
         playBtn.innerText = "⏸";
-        audio.play().catch(e => console.log("Ошибка воспроизведения."));
+        audio.play().catch(e => console.log("Ошибка воспроизведения:", e));
     }
 
     function pauseTrack() {
