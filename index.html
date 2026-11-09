@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Квадрат числа</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 350px; }
+        h2 { color: #333; margin-bottom: 20px; }
+        input { width: 90%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; text-align: center; box-sizing: border-box; }
+        button { width: 90%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; box-sizing: border-box; }
+        button:active { background: #0056b3; }
+        #result { margin-top: 20px; font-size: 18px; font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Возведение в квадрат</h2>
+    <input type="number" id="numInput" placeholder="Введите число">
+    <button onclick="calculate()">Посчитать</button>
+    <div id="result"></div>
+</div>
+
+<script>
+    function calculate() {
+        let input = document.getElementById('numInput').value;
+        if (input === "") {
+            document.getElementById('result').innerText = "Введите число!";
+            return;
+        }
+        let number = parseFloat(input);
+        let square = number * number;
+        document.getElementById('result').innerText = `Результат: ${square}`;
+    }
+</script>
+
+</body>
+</html>
