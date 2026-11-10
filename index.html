@@ -154,7 +154,7 @@
         const CLIENT_ID = '5519bb5a'; // Публичный тестовый ключ разработчика Jamendo
         const LIMIT = 1000;
         // Исправленный URL: добавлен корректный эндпоинт ://jamendo.com и интерполяция переменной
-        const url = `https://://jamendo.com?client_id=${CLIENT_ID}&format=json&limit=${LIMIT}&order=popularity_desc&include=musicinfo`;
+        const url = `https://jamendo.com{CLIENT_ID}&format=json&limit=${LIMIT}&order=popularity_desc&include=musicinfo`;
 
         try {
             const response = await fetch(url);
